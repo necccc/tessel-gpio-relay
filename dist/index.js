@@ -25,9 +25,10 @@ var Relay = function (_EventEmitter) {
         _this.port = port;
         _this.channels = channels;
 
-        _this.channelStates = channels.map(function () {
-            return false;
-        });
+        _this.channelStates = channels.reduce(function (obj, channel) {
+            obj[channel] = false;
+            return obj;
+        }, {});
 
         // Emit the ready event
         setImmediate(function () {
@@ -49,10 +50,8 @@ var Relay = function (_EventEmitter) {
             // Set the value of that gpio
             relay.write(value);
 
-            console.log('setRawValue', channel, this.channelStates[channel - 1], state);
-
             // Set our current state vars
-            this.channelStates[channel - 1] = value;
+            this.channelStates[channel] = value;
 
             // Call the callback
             if (callback) {
@@ -72,15 +71,12 @@ var Relay = function (_EventEmitter) {
     }, {
         key: 'getState',
         value: function getState(channel, callback) {
-
-            console.log('getState', channel);
-
             if (this.isInvalidChannel(channel)) {
                 console.log('getState - invalid channel', channel);
                 return callback && callback(new Error(ERR_INVALIDCHANNEL));
             }
 
-            callback && callback(null, this.channelStates[channel - 1]);
+            callback && callback(null, this.channelStates[channel]);
         }
     }, {
         key: 'setState',
@@ -96,15 +92,10 @@ var Relay = function (_EventEmitter) {
         value: function toggle(channel, callback) {
             var _this3 = this;
 
-            console.log('toggle', channel);
-
             this.getState(channel, function (err, state) {
                 if (err) {
                     return callback && callback(err);
                 }
-
-                console.log('toggle has state', state);
-
                 _this3.setRawValue(channel, !state, callback);
             });
         }

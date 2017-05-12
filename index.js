@@ -12,7 +12,10 @@ class Relay extends EventEmitter {
         this.port = port
         this.channels = channels
 
-        this.channelStates = channels.map(() => false)
+        this.channelStates = channels.reduce((obj, channel) => {
+            obj[channel] = false
+            return obj;
+        }, {})
 
         // Emit the ready event
         setImmediate(() => {
@@ -29,11 +32,8 @@ class Relay extends EventEmitter {
         // Set the value of that gpio
         relay.write(value);
 
-
-        console.log('setRawValue', channel, this.channelStates[channel - 1], state)
-
         // Set our current state vars
-        this.channelStates[channel - 1] = value;
+        this.channelStates[channel] = value;
 
         // Call the callback
         if (callback) {
@@ -52,15 +52,12 @@ class Relay extends EventEmitter {
     }
 
     getState (channel, callback) {
-
-        console.log('getState', channel)
-
         if (this.isInvalidChannel(channel)) {
             console.log('getState - invalid channel', channel)
             return callback && callback(new Error(ERR_INVALIDCHANNEL));
         }
 
-        callback && callback(null, this.channelStates[channel - 1]);
+        callback && callback(null, this.channelStates[channel]);
     }
 
     setState (channel, state, callback) {
@@ -72,16 +69,10 @@ class Relay extends EventEmitter {
     }
 
     toggle (channel, callback) {
-
-console.log('toggle', channel)
-
         this.getState(channel, (err, state) => {
             if (err) {
                 return callback && callback(err);
             }
-
-            console.log('toggle has state', state)
-
             this.setRawValue(channel, !state, callback)
         })
     }
