@@ -13,7 +13,7 @@ npm install tessel-gpio-relay
 
 Should work roughly the same as Tessel's [relay-mono](https://github.com/tessel/relay-mono). The main difference, that you have to provide the pin addresses in an array, see below:
 
-```
+```js
 var tessel = require('tessel');
 var relaylib = require('tessel-gpio-relay'); 
 
@@ -46,7 +46,7 @@ relay.on('latch', function(channel, value) {
 You have to provide the pin addresses in an array for the Relay instance.
 Numeric addresses starting from 1, examples:
 
-```
+```js
 
 // to use the official tessel relay module
 var relay = relaylib.use(tessel.port['A'], [5,6]); 
