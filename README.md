@@ -11,6 +11,8 @@ npm install tessel-gpio-relay
 
 ## Example
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/yvArUpkDpZk?rel=0" frameborder="0" allowfullscreen></iframe>
+
 Should work roughly the same as Tessel's [relay-mono](https://github.com/tessel/relay-mono). The main difference, that you have to provide the pin addresses in an array, see below:
 
 ```js
@@ -96,6 +98,8 @@ Emitted when the latch state (boolean on or off ) is changed for a channel.
 
 #### relay.on( 'ready', callback() )
 Emitted upon first successful communication between the Tessel and the module.
+
+
 
 ## License
 
