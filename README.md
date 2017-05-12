@@ -11,7 +11,8 @@ npm install tessel-gpio-relay
 
 ## Example
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/yvArUpkDpZk?rel=0" frameborder="0" allowfullscreen></iframe>
+
+[![Video: Tessel2 drives a SainSmart 4-channel relay via GPIO](https://img.youtube.com/vi/yvArUpkDpZk/0.jpg)](https://www.youtube.com/watch?v=yvArUpkDpZk)
 
 Should work roughly the same as Tessel's [relay-mono](https://github.com/tessel/relay-mono). The main difference, that you have to provide the pin addresses in an array, see below:
 
