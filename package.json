@@ -1,6 +1,6 @@
 {
   "name": "tessel-gpio-relay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "JavaScript driver for Tessel, to connect with multi-port relays via GPIO",
   "main": "dist/index.js",
   "files": [
