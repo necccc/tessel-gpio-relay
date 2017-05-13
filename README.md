@@ -16,9 +16,7 @@ npm install tessel-gpio-relay
 
 Should work roughly the same as Tessel's [relay-mono](https://github.com/tessel/relay-mono). The main difference, that you have to provide the pin addresses in an array, see below:
 
-
 ```js
-
 var tessel = require('tessel');
 var relaylib = require('tessel-gpio-relay'); 
 
@@ -50,21 +48,9 @@ relay.on('latch', function(channel, value) {
 
 #### channels {Array}
 
+This module supports multi-channel relays, more than the default 2 on the tessel relay module.
 
-#### switchState {String} 'high|low'
-
-Some relays switch from default state when set to high value on the GPIO pins, and some are the opposite, they trigger switch state from default on the low value.
-
-For example the official Tessel relay modules switch from default off to on at a high pin value, while the SainSmart relay modules do this on the low state.
-
-To handle this, you can configure the module, to which value (high|low) to use for the ON state, which is always passed in the methods as a truthy value.
-
-
-
-
-### Usage
-
-You have to provide the pin addresses in an array for the Relay instance.
+You have to provide the pin addresses, to which the relay is connected in an array for the Relay instance.
 Numeric addresses starting from 1, examples:
 
 ```js
@@ -80,6 +66,31 @@ var relay = relaylib.use(tessel.port['A'], [1,2,3,4]);
 
 
 ```
+
+#### switchState {String} 'high|low'
+
+Some relays switch from default state when set to high value on the GPIO pins, and some are the opposite, they trigger switch state from default on the low value.
+
+For example the official Tessel relay modules switch from default off to on at a high pin value, while the SainSmart relay modules do this on the low state.
+
+To handle this, you can configure the module, to which value (high|low) to use for the ON state, which is always passed in the methods as a truthy value.
+
+Default value is `'low'`
+
+```js
+
+// to use the official tessel relay module
+// the pins 5 & 6 will be set 'low' on init, and pulled 'high' on activation
+var relay = relaylib.use(tessel.port['A'], [5,6], 'high'); 
+
+// hook a 4 channel relay on pin 1,2,3,4
+// the pins 1,2,3,4 will be pulled 'high' on init, and set 'low' on activation
+var relay = relaylib.use(tessel.port['A'], [1,2,3,4]); 
+
+```
+
+
+### Initialization
 
 #### relaylib.use(tesselPort, channels, [callback])
 
