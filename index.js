@@ -1,24 +1,37 @@
 const EventEmitter = require('events')
 
 const ERR_INVALIDCHANNEL = "Invalid relay channel."
+
 const HIGH = 1
 const LOW = 0
 
 class Relay extends EventEmitter {
 
-    constructor (port, channels, callback) {
+    constructor (port, channels, switchState = 'low', callback) {
         super()
+
+        if (typeof switchState === 'function') {
+            callback = arguments[2]
+            switchState = 'low'
+        }
 
         this.port = port
         this.channels = channels
 
+        this.ON = LOW
+        this.OFF = HIGH
+
+        if (switchState === 'high') {
+            this.ON = HIGH
+            this.OFF = LOW
+        }
+
         this.channelStates = channels.reduce((obj, channel) => {
             obj[channel] = false
-            this.setPin(channel, LOW)
+            this.setPin(channel, this.OFF)
             return obj;
         }, {})
 
-        // Emit the ready event
         setImmediate(() => {
             this.emit('ready')
             if (callback) {
@@ -29,29 +42,24 @@ class Relay extends EventEmitter {
 
     setPin (channel, value) {
         var relay = this.port.pin[channel - 1];
-        // Set the value of that gpio
         relay.write(value);
     }
 
     setRawValue (channel, state, callback, silent = false) {
-        var value = (state ? HIGH : LOW)
+        var value = (state ? this.ON : this.OFF)
         this.setPin(channel, value)
 
-        // Set our current state vars
         this.channelStates[channel] = value;
 
-        // Call the callback
         if (callback) {
             callback(null);
         }
 
-        // Set the event
         if (!silent) {
             setImmediate(() => {
                 this.emit('latch', channel, state);
             });
         }
-
     }
 
     isInvalidChannel (channel) {
@@ -60,11 +68,12 @@ class Relay extends EventEmitter {
 
     getState (channel, callback) {
         if (this.isInvalidChannel(channel)) {
-            console.log('getState - invalid channel', channel)
             return callback && callback(new Error(ERR_INVALIDCHANNEL));
         }
 
-        callback && callback(null, this.channelStates[channel]);
+        var state = this.channelStates[channel] === this.ON ? true : false;
+
+        callback && callback(null, state);
     }
 
     setState (channel, state, callback) {
@@ -89,7 +98,7 @@ class Relay extends EventEmitter {
             return callback && callback(new Error(ERR_INVALIDCHANNEL));
         }
 
-        this.setRawValue(channel, HIGH, callback)
+        this.setRawValue(channel, true, callback)
     }
 
     turnOff (channel, callback) {
@@ -97,7 +106,7 @@ class Relay extends EventEmitter {
             return callback && callback(new Error(ERR_INVALIDCHANNEL));
         }
 
-        this.setRawValue(channel, LOW, callback)
+        this.setRawValue(channel, false, callback)
     }
 
 }

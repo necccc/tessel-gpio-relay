@@ -11,27 +11,43 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var EventEmitter = require('events');
 
 var ERR_INVALIDCHANNEL = "Invalid relay channel.";
+
 var HIGH = 1;
 var LOW = 0;
 
 var Relay = function (_EventEmitter) {
     _inherits(Relay, _EventEmitter);
 
-    function Relay(port, channels, callback) {
+    function Relay(port, channels) {
+        var switchState = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'low';
+        var callback = arguments[3];
+
         _classCallCheck(this, Relay);
 
         var _this = _possibleConstructorReturn(this, (Relay.__proto__ || Object.getPrototypeOf(Relay)).call(this));
 
+        if (typeof switchState === 'function') {
+            callback = arguments[2];
+            switchState = 'low';
+        }
+
         _this.port = port;
         _this.channels = channels;
 
+        _this.ON = LOW;
+        _this.OFF = HIGH;
+
+        if (switchState === 'high') {
+            _this.ON = HIGH;
+            _this.OFF = LOW;
+        }
+
         _this.channelStates = channels.reduce(function (obj, channel) {
             obj[channel] = false;
-            _this.setPin(channel, LOW);
+            _this.setPin(channel, _this.OFF);
             return obj;
         }, {});
 
-        // Emit the ready event
         setImmediate(function () {
             _this.emit('ready');
             if (callback) {
@@ -45,7 +61,6 @@ var Relay = function (_EventEmitter) {
         key: 'setPin',
         value: function setPin(channel, value) {
             var relay = this.port.pin[channel - 1];
-            // Set the value of that gpio
             relay.write(value);
         }
     }, {
@@ -55,18 +70,15 @@ var Relay = function (_EventEmitter) {
 
             var silent = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
-            var value = state ? HIGH : LOW;
+            var value = state ? this.ON : this.OFF;
             this.setPin(channel, value);
 
-            // Set our current state vars
             this.channelStates[channel] = value;
 
-            // Call the callback
             if (callback) {
                 callback(null);
             }
 
-            // Set the event
             if (!silent) {
                 setImmediate(function () {
                     _this2.emit('latch', channel, state);
@@ -82,11 +94,12 @@ var Relay = function (_EventEmitter) {
         key: 'getState',
         value: function getState(channel, callback) {
             if (this.isInvalidChannel(channel)) {
-                console.log('getState - invalid channel', channel);
                 return callback && callback(new Error(ERR_INVALIDCHANNEL));
             }
 
-            callback && callback(null, this.channelStates[channel]);
+            var state = this.channelStates[channel] === this.ON ? true : false;
+
+            callback && callback(null, state);
         }
     }, {
         key: 'setState',
@@ -116,7 +129,7 @@ var Relay = function (_EventEmitter) {
                 return callback && callback(new Error(ERR_INVALIDCHANNEL));
             }
 
-            this.setRawValue(channel, HIGH, callback);
+            this.setRawValue(channel, true, callback);
         }
     }, {
         key: 'turnOff',
@@ -125,7 +138,7 @@ var Relay = function (_EventEmitter) {
                 return callback && callback(new Error(ERR_INVALIDCHANNEL));
             }
 
-            this.setRawValue(channel, LOW, callback);
+            this.setRawValue(channel, false, callback);
         }
     }]);
 

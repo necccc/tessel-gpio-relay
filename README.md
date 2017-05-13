@@ -16,7 +16,9 @@ npm install tessel-gpio-relay
 
 Should work roughly the same as Tessel's [relay-mono](https://github.com/tessel/relay-mono). The main difference, that you have to provide the pin addresses in an array, see below:
 
+
 ```js
+
 var tessel = require('tessel');
 var relaylib = require('tessel-gpio-relay'); 
 
@@ -43,6 +45,22 @@ relay.on('latch', function(channel, value) {
 });
 
 ```
+
+### Configuration
+
+#### channels {Array}
+
+
+#### switchState {String} 'high|low'
+
+Some relays switch from default state when set to high value on the GPIO pins, and some are the opposite, they trigger switch state from default on the low value.
+
+For example the official Tessel relay modules switch from default off to on at a high pin value, while the SainSmart relay modules do this on the low state.
+
+To handle this, you can configure the module, to which value (high|low) to use for the ON state, which is always passed in the methods as a truthy value.
+
+
+
 
 ### Usage
 

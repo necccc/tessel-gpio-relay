@@ -41,7 +41,46 @@ suite('module init', function () {
     })
 
 
-    test('sets all ports to LOW on init', function (done) {
+    test('sets all ports to OFF (1) on init', function (done) {
+        var callback = function () {
+
+            sinon.assert.calledOnce(port.pin[0].write)
+            sinon.assert.calledWithExactly(port.pin[0].write, 1)
+
+            sinon.assert.calledOnce(port.pin[1].write)
+            sinon.assert.calledWithExactly(port.pin[1].write, 1)
+
+            done();
+        }
+        var relay = new relaylib.Relay(port, [1,2], callback)
+    })
+
+})
+
+suite('module init - on state is high', function () {
+
+    var port = {
+        pin: [
+            {},{},{},{},{},{},{},{}
+        ]
+    }
+
+    setup(function () {
+        port.pin.map(function (obj) {
+            obj.write = function() {}
+            sinon.stub(obj, "write")
+            return obj
+        })
+    })
+
+    teardown(function () {
+        port.pin.map(function (obj) {
+            obj.write.restore()
+            return obj
+        })
+    })
+
+    test('sets all ports to OFF (0) on init', function (done) {
         var callback = function () {
 
             sinon.assert.calledOnce(port.pin[0].write)
@@ -52,10 +91,11 @@ suite('module init', function () {
 
             done();
         }
-        var relay = new relaylib.Relay(port, [1,2], callback)
+        var relay = new relaylib.Relay(port, [1,2], 'high', callback)
     })
 
 })
+
 
 suite('methods', function () {
 
@@ -108,7 +148,7 @@ suite('methods', function () {
 
         relay.setState(2, true, function () {
             sinon.assert.calledOnce(port.pin[1].write)
-            sinon.assert.calledWithExactly(port.pin[1].write, 1)
+            sinon.assert.calledWithExactly(port.pin[1].write, 0)
             relay.getState(2, callback)
         })
 
@@ -126,7 +166,7 @@ suite('methods', function () {
 
         relay.toggle(3, function () {
             sinon.assert.calledOnce(port.pin[2].write)
-            sinon.assert.calledWithExactly(port.pin[2].write, 1)
+            sinon.assert.calledWithExactly(port.pin[2].write, 0)
             relay.getState(3, callback)
         })
 
@@ -144,7 +184,7 @@ suite('methods', function () {
         }
         relay.turnOn(4, function () {
             sinon.assert.calledOnce(port.pin[3].write)
-            sinon.assert.calledWithExactly(port.pin[3].write, 1)
+            sinon.assert.calledWithExactly(port.pin[3].write, 0)
             relay.getState(4, callback)
         })
 
@@ -165,7 +205,7 @@ suite('methods', function () {
             relay.turnOff(1, function () {
 
                 sinon.assert.calledOnce(port.pin[0].write)
-                sinon.assert.calledWithExactly(port.pin[0].write, 0)
+                sinon.assert.calledWithExactly(port.pin[0].write, 1)
 
                 relay.getState(1, callback)
             })
@@ -173,3 +213,4 @@ suite('methods', function () {
     })
 
 })
+

@@ -22,7 +22,8 @@
     "t2:push": "t2 push ./test.js",
     "t2:run": "t2 run ./test.js",
     "build": "babel index.js --out-dir dist",
-    "test": "npm run build && node_modules/mocha/bin/mocha --ui tdd test/*"
+    "test": "npm run build && node_modules/mocha/bin/mocha --ui tdd test/*",
+    "prepublish": "npm run test"
   },
   "repository": {
     "type": "git",
