@@ -27,6 +27,7 @@ var Relay = function (_EventEmitter) {
 
         _this.channelStates = channels.reduce(function (obj, channel) {
             obj[channel] = false;
+            _this.setPin(channel, LOW);
             return obj;
         }, {});
 
@@ -41,14 +42,21 @@ var Relay = function (_EventEmitter) {
     }
 
     _createClass(Relay, [{
+        key: 'setPin',
+        value: function setPin(channel, value) {
+            var relay = this.port.pin[channel - 1];
+            // Set the value of that gpio
+            relay.write(value);
+        }
+    }, {
         key: 'setRawValue',
         value: function setRawValue(channel, state, callback) {
             var _this2 = this;
 
-            var relay = this.port.pin[channel - 1];
+            var silent = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
             var value = state ? HIGH : LOW;
-            // Set the value of that gpio
-            relay.write(value);
+            this.setPin(channel, value);
 
             // Set our current state vars
             this.channelStates[channel] = value;
@@ -59,9 +67,11 @@ var Relay = function (_EventEmitter) {
             }
 
             // Set the event
-            setImmediate(function () {
-                _this2.emit('latch', channel, state);
-            });
+            if (!silent) {
+                setImmediate(function () {
+                    _this2.emit('latch', channel, state);
+                });
+            }
         }
     }, {
         key: 'isInvalidChannel',

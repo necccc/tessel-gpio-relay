@@ -4,8 +4,29 @@ var relaylib = require('../dist/index')
 
 suite('module init', function () {
 
+    var port = {
+        pin: [
+            {},{},{},{},{},{},{},{}
+        ]
+    }
+
+    setup(function () {
+        port.pin.map(function (obj) {
+            obj.write = function() {}
+            sinon.stub(obj, "write")
+            return obj
+        })
+    })
+
+    teardown(function () {
+        port.pin.map(function (obj) {
+            obj.write.restore()
+            return obj
+        })
+    })
+
     test('emit ready event', function (done) {
-        var relay = relaylib.use({}, [1,2,3])
+        var relay = relaylib.use(port, [1,2,3])
 
         relay.on('ready', function () {
             done()
@@ -16,7 +37,22 @@ suite('module init', function () {
         var callback = function () {
             done();
         }
-        var relay = new relaylib.Relay({}, [1,2,3], callback)
+        var relay = new relaylib.Relay(port, [1,2,3], callback)
+    })
+
+
+    test('sets all ports to LOW on init', function (done) {
+        var callback = function () {
+
+            sinon.assert.calledOnce(port.pin[0].write)
+            sinon.assert.calledWithExactly(port.pin[0].write, 0)
+
+            sinon.assert.calledOnce(port.pin[1].write)
+            sinon.assert.calledWithExactly(port.pin[1].write, 0)
+
+            done();
+        }
+        var relay = new relaylib.Relay(port, [1,2], callback)
     })
 
 })
@@ -61,6 +97,7 @@ suite('methods', function () {
 
     test('setState', function (done) {
         var relay = relaylib.use(port, [1,2,3])
+        port.pin[1].write.reset()
 
         var callback = function (err, state) {
             if (err) return done(err)
@@ -79,7 +116,7 @@ suite('methods', function () {
 
     test('toggle', function (done) {
         var relay = relaylib.use(port, [1,2,3])
-
+        port.pin[2].write.reset()
         var callback = function (err, state) {
             if (err) return done(err)
 
@@ -97,6 +134,8 @@ suite('methods', function () {
 
     test('turnOn', function (done) {
         var relay = relaylib.use(port, [1,2,3,4])
+        port.pin[3].write.reset()
+
         var callback = function (err, state) {
             if (err) return done(err)
 
@@ -119,6 +158,7 @@ suite('methods', function () {
             assert(!state)
             done()
         }
+        port.pin[0].write.reset()
         relay.turnOn(1, function () {
             port.pin[0].write.reset()
 

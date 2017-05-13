@@ -14,6 +14,7 @@ class Relay extends EventEmitter {
 
         this.channelStates = channels.reduce((obj, channel) => {
             obj[channel] = false
+            this.setPin(channel, LOW)
             return obj;
         }, {})
 
@@ -26,11 +27,15 @@ class Relay extends EventEmitter {
         })
     }
 
-    setRawValue (channel, state, callback) {
+    setPin (channel, value) {
         var relay = this.port.pin[channel - 1];
-        var value = (state ? HIGH : LOW)
         // Set the value of that gpio
         relay.write(value);
+    }
+
+    setRawValue (channel, state, callback, silent = false) {
+        var value = (state ? HIGH : LOW)
+        this.setPin(channel, value)
 
         // Set our current state vars
         this.channelStates[channel] = value;
@@ -41,9 +46,11 @@ class Relay extends EventEmitter {
         }
 
         // Set the event
-        setImmediate(() => {
-            this.emit('latch', channel, state);
-        });
+        if (!silent) {
+            setImmediate(() => {
+                this.emit('latch', channel, state);
+            });
+        }
 
     }
 
