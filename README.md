@@ -108,6 +108,13 @@ create a Relay instance directly
 
 Gets the state of the specified relay channel: "true" for on and "false" for off.
 
+#### relay.setState( relayChannel, state, [callback(err, state)])
+
+Set the state of the relay on the given `channel`. The value of `state` is  evaluated as boolead,
+any truthy value sets the relay switched on, otherwise off. 
+
+Also check out the [`switchState`](#switchstate-string-highlow) option for initialization!
+
 #### relay.toggle( relayChannel, [callback(err)] )
 
 Switches the state of the specified relay channel: on if it's off; off if it's on.
